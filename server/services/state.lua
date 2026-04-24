@@ -81,16 +81,57 @@ function MZSyncHasPermission(source)
     return false
 end
 
+local function normalizeNotifyType(notifyType)
+    local key = tostring(notifyType or 'info'):lower()
+
+    if key == 'success' or key == 'error' or key == 'warning' or key == 'info' then
+        return key
+    end
+
+    if key == 'inform' then
+        return 'info'
+    end
+
+    return 'info'
+end
+
+local function sendNotify(source, notifyType, message, title)
+    if source == nil or source <= 0 then
+        return false
+    end
+
+    if GetResourceState('mz_notify') ~= 'started' then
+        return false
+    end
+
+    exports['mz_notify']:Notify(source, {
+        type = normalizeNotifyType(notifyType),
+        title = tostring(title or 'mz_sync'),
+        message = tostring(message or ''),
+        duration = 5000
+    })
+
+    return true
+end
+
 function MZSyncNotifyDenied(source)
+    if sendNotify(source, 'error', 'Voce nao tem permissao para usar este comando.') then
+        return
+    end
+
     TriggerClientEvent('chat:addMessage', source, {
         color = { 255, 80, 80 },
-        args = { 'mz_sync', 'Você não tem permissão para usar este comando.' }
+        args = { 'mz_sync', 'Voce nao tem permissao para usar este comando.' }
     })
 end
 
-function MZSyncReply(source, msg)
+function MZSyncReply(source, msg, notifyType)
     if source == 0 then
         print(('[mz_sync] %s'):format(msg))
+        return
+    end
+
+    if sendNotify(source, notifyType or 'info', msg) then
         return
     end
 
