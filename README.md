@@ -48,7 +48,6 @@ ensure ox_lib
 
 ensure mapmanager
 ensure spawnmanager
-ensure sessionmanager
 
 ensure pma-voice
 
